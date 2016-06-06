@@ -171,7 +171,6 @@ def initSqldb():	# Recreate a new table for testing
 		db.rollback()
 	db.close()	# Disconnect from server
 
-<<<<<<< HEAD
 def updateSqlRecord(newNotesField):	# update hardcoded record
 	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB) # Open sql connection
 	cursor = db.cursor()
