@@ -15,22 +15,22 @@ import datetime
 from PyFileMaker import FMServer
 
 # Get access details from env / Or set locally (for debugging only) 
-FMDBHOST = os.environ.get('FMDBHOST')					# FMDBHOST = 'host name or ip address'
-FMDB = os.environ.get('FMDB')							# FMDB = 'fm database name'
-FMDBUSER = os.environ.get('FMDBUSER')					# FMDBUSER = 'fm user name'
-FMDBPASSWORD = os.environ.get('FMDBPASSWORD')			# FMDBPASSWORD = 'fm password'
-SQLDBHOST = os.environ.get('SQLDBHOST')					# SQLDBHOST = 'host name or ip address'
-SQLDB = os.environ.get('SQLDB')							# SQLDB = 'sql database name'
-SQLDBUSER = os.environ.get('SQLDBUSER')					# SQLDBUSER = 'sql user name'
-SQLDBPASSWORD = os.environ.get('SQLDBPASSWORD')			# SQLDBPASSWORD = 'sql password'
+FMDBHOST = os.environ.get('FMDBHOST')	# FMDBHOST = 'host name or ip address'
+FMDB = os.environ.get('FMDB')			# FMDB = 'fm database name'
+FMDBUSER = os.environ.get('FMDBUSER')	# FMDBUSER = 'fm user name'
+FMDBPASSWORD = os.environ.get('FMDBPASSWORD')	# FMDBPASSWORD = 'fm password'
+SQLDBHOST = os.environ.get('SQLDBHOST')	# SQLDBHOST = 'host name or ip address'
+SQLDB = os.environ.get('SQLDB')			# SQLDB = 'sql database name'
+SQLDBUSER = os.environ.get('SQLDBUSER')	# SQLDBUSER = 'sql user name'
+SQLDBPASSWORD = os.environ.get('SQLDBPASSWORD')	# SQLDBPASSWORD = 'sql password'
 
-FMACCESS = FMDBUSER+':'+FMDBPASSWORD+'@'+FMDBHOST		# Facilitate fm db connection
-fm = FMServer('http://'+FMACCESS)						# Facilitate fm db connection
-fm._debug = True 										# Enable fms debugging (exposes urls)
-fm.setDb(FMDB) 	 										# Declare fms db to be used
+FMACCESS = FMDBUSER+':'+FMDBPASSWORD+'@'+FMDBHOST	# Facilitate fm db connection
+fm = FMServer('http://'+FMACCESS)					# Facilitate fm db connection
+fm._debug = True 									# Enable fms debugging (exposes urls)
+fm.setDb(FMDB) 	 									# Declare fms db to be used
 
 
-def checkDbserver():									# wake sqlserver when sleeping (beta)
+def checkDbserver():					# wake sqlserver when sleeping (beta)
 	hostname = SQLDBHOST#example
 	response = os.system("ping -c 1 " + hostname)
 	#and then check the response...
@@ -39,14 +39,14 @@ def checkDbserver():									# wake sqlserver when sleeping (beta)
 		print getDbseverVersion()
 	else:
 		  from subprocess import call
-		  call(["~/scripts/wakepve.sh"])				# actual script to send wol package
+		  call(["~/scripts/wakepve.sh"]) # actual script to send wol package
 
 
-def getDbseverVersion():								# return version number of the sql server
+def getDbseverVersion():				 # return version number of the sql server
 	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB)	
 	cursor = db.cursor()
-	cursor.execute("SELECT VERSION()")					# execute SQL query using execute() method.
-	data = cursor.fetchone()							# Fetch a single row using fetchone() method.
+	cursor.execute("SELECT VERSION()")	 # execute SQL query using execute() method.
+	data = cursor.fetchone()			 # Fetch a single row using fetchone() method.
 	version = "Database version : %s " % data
 	db.close()	# disconnect from server
 	return version
@@ -64,7 +64,7 @@ def getLayoutsFromFMdb():
 	return
 
 
-def dateFormat(sourceDate):													# Define format for sql injection
+def dateFormat(sourceDate):					# Define format for sql injection
 	try:
 		newdate = sourceDate.strftime("%Y-%m-%d")
 	except IOError as e:
@@ -81,15 +81,15 @@ def intFormat(sourceInt):
 		return 
 
 
-def getFromFMdb(): 															# read 10 records from "export sync" and put in sql db
-	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB)			# Open sql connection
+def getFromFMdb(): 								# read 10 records from "export sync" and put in sql db
+	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB)	# Open sql connection
 	cursor = db.cursor()
-	selector = 'export sync'												# Define layout from fms
-	fm.setLayout(selector)													# Use defined layout
+	selector = 'export sync'					# Define layout from fms
+	fm.setLayout(selector)						# Use defined layout
 
-	myList = list(range(29000,29010)) 										# Look for the x records
+	myList = list(range(29000,29010)) 			# Look for the x records
 	results = fm.doFindQuery({'_Customer_ID': myList, }) 
-	print 'Number of results : ', len(results) 														# Display the numeber of objects (records) found 
+	print 'Number of results : ', len(results) 	# Display the numeber of objects (records) found 
 
 	cursor = db.cursor()
 
@@ -101,27 +101,28 @@ def getFromFMdb(): 															# read 10 records from "export sync" and put i
 		# print dir(entry)
 		print '.',
 		try:
-			cursor.execute("""INSERT INTO `test_database`.`export` (`Customer_ID`, `Sales_Agent_ID`, `Receipt_ID`, `Notes`, `Date_Scheduled_Payment_2`) VALUES (%s,%s,%s,%s,%s )""", \
+			cursor.execute("""INSERT INTO `test_database`.`export` (`Customer_ID`, \
+				`Sales_Agent_ID`, `Receipt_ID`, `Notes`, `Date_Scheduled_Payment_2`) VALUES (%s,%s,%s,%s,%s )""", \
 				(entry.Customer_ID, entry.Sales_Agent_ID, entry.Receipt_ID, entry.Notes, entry.Date_Scheduled_Payment_2))
 			db.commit()
 		except ValueError as e:
 			print "RecordID ", entry.RECORDID , "sql transaction not succesful ", e
 			db.rollback()
 
-	db.close()																# Disconnect from sql server
+	db.close()										# Disconnect from sql server
 	return
 
 
 def getFromSqldb():
-	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB)			# Open sql connection
-	cursor = db.cursor()													# Prepare a cursor object using cursor() method
+	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB)	# Open sql connection
+	cursor = db.cursor()							# Prepare a cursor object using cursor() method
 	# Prepare SQL query to INSERT a record into the database.
 	# sql = "SELECT * FROM `export` "
 	sql = "SELECT * FROM  `export` WHERE Customer_ID > 29000 "
 
 	try:
-		cursor.execute(sql)													# Execute the SQL command
-		results = cursor.fetchall() 										# Fetch all the rows in a list of lists.
+		cursor.execute(sql)							 # Execute the SQL command
+		results = cursor.fetchall() 				 # Fetch all the rows in a list of lists.
 		dbList=[]
 		for row in results:
 			Customer_ID = row[0]
@@ -134,20 +135,20 @@ def getFromSqldb():
 			dbList.append(record)
 	except IOError as e:
 		print "Error: unable to fetch data", e	
-	db.close()																	# Disconnect from server
+	db.close()										# Disconnect from server
 	return dbList
 
 def sendToFMdb():
-	fm.setDb('tc_export_trial') 												# Declare fms db to be used
-	selector = 'export sync'													# Define layout 
-	fm.setLayout(selector)														# Use defined layout
+	fm.setDb('tc_export_trial') 					# Declare fms db to be used
+	selector = 'export sync'						# Define layout 
+	fm.setLayout(selector)							# Use defined layout
 	result = fm.doFind(_Customer_ID = 29000 ) 
 	return result
 
 def editFMdb():
-	fm.setDb('tc_export_trial') 												# Declare fms db to be used
-	selector = 'export sync'													# Define layout 
-	fm.setLayout(selector)														# Use defined layout
+	fm.setDb('tc_export_trial') 					# Declare fms db to be used
+	selector = 'export sync'						# Define layout 
+	fm.setLayout(selector)							# Use defined layout
 	result = fm.doFind(_Customer_ID = 29000) 
 	for item in result:
 		newData = getNewValue()
@@ -157,9 +158,9 @@ def editFMdb():
 	return 
 
 
-def initSqldb():																# Recreate a new table for testing
-	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB)				# Open sql connection
-	cursor = db.cursor()														# Prepare a cursor object using cursor() method									# Debug  test sql db access
+def initSqldb():									# Recreate a new table for testing
+	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB) # Open sql connection
+	cursor = db.cursor()							# Prepare a cursor object using cursor() method									
 	try:
 		cursor.execute("""DROP TABLE IF EXISTS  `export`""")
 		cursor.execute("""CREATE TABLE `export` \
@@ -168,11 +169,11 @@ def initSqldb():																# Recreate a new table for testing
 		db.commit()
 	except:
 		db.rollback()
-	db.close()																	# Disconnect from server
+	db.close()											# Disconnect from server
 
 <<<<<<< HEAD
-def updateSqlRecord(newNotesField):															# update hardcoded record
-	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB)				# Open sql connection
+def updateSqlRecord(newNotesField):						# update hardcoded record
+	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB) # Open sql connection
 	cursor = db.cursor()
 	try:
 		cursor.execute("""UPDATE `test_database`.`export` SET `Notes`=%s WHERE  `Customer_ID`=29000 AND `Sales_Agent_ID`=85 AND `Receipt_ID`=29094 LIMIT 1;""", [newNotesField])
@@ -184,7 +185,7 @@ def updateSqlRecord(newNotesField):															# update hardcoded record
 	return
 
 def getNewValue():
-	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB)				# Open sql connection
+	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB)	# Open sql connection
 	cursor = db.cursor()
 	cursor.execute("""SELECT `Notes` FROM `test_database`.`export` WHERE  `Customer_ID`=29000 LIMIT 1;""")
 	data = str((cursor.fetchone()[0]))
@@ -202,10 +203,7 @@ def run():
 
 run() 
 
-# note = ຄຳມ່ວນ
-
-# 
-# getFromFMdb()
+# original content note field = ຄຳມ່ວນ
 
 # --
 # s = getFromSqldb()
@@ -214,25 +212,6 @@ run()
 # 	for item in range(0,5):
 # 		print (record[item].split('='))
 # --
-# currentlist = getFromSqldb()
-=======
-
-# run 
-# checkDbserver()
-# initSqldb()
-# getFromFMdb()
-
-
-
-# some sql stuff
-# UPDATE `test_database`.`export` SET `Notes`='test 2.' WHERE  `Customer_ID`=29000 AND `Sales_Agent_ID`=85 AND `Receipt_ID`=29094 AND `Notes`='None'  LIMIT 1;
-# SELECT `Customer_ID`, `Sales_Agent_ID`, `Receipt_ID`, `Notes`, `Date_Scheduled_Payment_2` FROM `test_database`.`export` WHERE  `Customer_ID`=29000 AND `Sales_Agent_ID`=85 AND `Receipt_ID`=29094 AND `Notes`='This is an example note.' AND `Date_Scheduled_Payment_2`='0000-00-00' LIMIT 1;
-
-
-# ___
-
-# getFromFMdb()
-
 
 
 	
