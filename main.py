@@ -8,6 +8,7 @@
 #
 # python 2.7 
 #
+
 import unicodedata
 import os
 import MySQLdb
@@ -164,9 +165,8 @@ def run():
 	# Customer_ID = 29000
 	initSqldb()												# erase all data in sql db
 	getFromFMdb()											# 10 records from fm to sql
-	updateSqlRecord('1) This is a note entered into sql db ')	# update notes field in one sql record with indicated text			
+	updateSqlRecord('1) This is a note entered into sql db.')	# update notes field in one sql record with indicated text			
 	editFMdb()												# write field back from sql db to fm db for this record
-
 	return
 
 run() 
