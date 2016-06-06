@@ -16,18 +16,18 @@ from PyFileMaker import FMServer
 
 # Get access details from env / Or set locally (for debugging only) 
 FMDBHOST = os.environ.get('FMDBHOST')	# FMDBHOST = 'host name or ip address'
-FMDB = os.environ.get('FMDB')			# FMDB = 'fm database name'
+FMDB 	= os.environ.get('FMDB')	# FMDB = 'fm database name'
 FMDBUSER = os.environ.get('FMDBUSER')	# FMDBUSER = 'fm user name'
 FMDBPASSWORD = os.environ.get('FMDBPASSWORD')	# FMDBPASSWORD = 'fm password'
 SQLDBHOST = os.environ.get('SQLDBHOST')	# SQLDBHOST = 'host name or ip address'
-SQLDB = os.environ.get('SQLDB')			# SQLDB = 'sql database name'
+SQLDB = os.environ.get('SQLDB')	# SQLDB = 'sql database name'
 SQLDBUSER = os.environ.get('SQLDBUSER')	# SQLDBUSER = 'sql user name'
 SQLDBPASSWORD = os.environ.get('SQLDBPASSWORD')	# SQLDBPASSWORD = 'sql password'
 
 FMACCESS = FMDBUSER+':'+FMDBPASSWORD+'@'+FMDBHOST	# Facilitate fm db connection
-fm = FMServer('http://'+FMACCESS)					# Facilitate fm db connection
-fm._debug = True 									# Enable fms debugging (exposes urls)
-fm.setDb(FMDB) 	 									# Declare fms db to be used
+fm = FMServer('http://'+FMACCESS)	# Facilitate fm db connection
+fm._debug = True	# Enable fms debugging (exposes urls)
+fm.setDb(FMDB)	# Declare fms db to be used
 
 
 def checkDbserver():					# wake sqlserver when sleeping (beta)
