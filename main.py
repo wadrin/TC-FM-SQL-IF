@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # coding: utf-8
 #
-# main.py version 0.2 - June 6, 2016 by <Jaap at kroesschell-ictconsulting.ch>
+# filename main.py 
+# version 0.2 - June 6, 2016 by <Jaap at kroesschell-ictconsulting.ch>
 # Objective read payments , modify and update payment using PyFileMaker
 # 
 #
