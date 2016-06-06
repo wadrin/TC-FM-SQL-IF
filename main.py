@@ -2,7 +2,7 @@
 # coding: utf-8
 #
 # filename main.py 
-# version 0.3 - June 6, 2016 by <Jaap at kroesschell-ictconsulting.ch>
+# version 0.31 - June 6, 2016 by <Jaap at kroesschell-ictconsulting.ch>
 # Objective read payments , modify and update payment using PyFileMaker
 # 
 #
@@ -28,6 +28,28 @@ FMACCESS = FMDBUSER+':'+FMDBPASSWORD+'@'+FMDBHOST		# Facilitate fm db connection
 fm = FMServer('http://'+FMACCESS)						# Facilitate fm db connection
 fm._debug = True 										# Enable fms debugging (exposes urls)
 fm.setDb(FMDB) 	 										# Declare fms db to be used
+
+
+def checkDbserver():									# wake sqlserver when sleeping (beta)
+	hostname = SQLDBHOST#example
+	response = os.system("ping -c 1 " + hostname)
+	#and then check the response...
+	if response == 0:
+		print hostname, 'is up!… '
+		print getDbseverVersion()
+	else:
+		  from subprocess import call
+		  call(["~/scripts/wakepve.sh"])				# actual script to send wol package
+
+
+def getDbseverVersion():								# return version number of the sql server
+	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB)	
+	cursor = db.cursor()
+	cursor.execute("SELECT VERSION()")					# execute SQL query using execute() method.
+	data = cursor.fetchone()							# Fetch a single row using fetchone() method.
+	version = "Database version : %s " % data
+	db.close()	# disconnect from server
+	return version
 
 
 def getLayoutsFromFMdb():
@@ -68,11 +90,19 @@ def getFromFMdb(): 															# read 10 records from "export sync" and put i
 	myList = list(range(29000,29010)) 										# Look for the x records
 	results = fm.doFindQuery({'_Customer_ID': myList, }) 
 	print 'Number of results : ', len(results) 														# Display the numeber of objects (records) found 
+
+	cursor = db.cursor()
+
+
+	print "===================="
+	print '   send to sql db   '
+	print "===================="
 	for entry in results: 
 		# print dir(entry)
 		print '.',
 		try:
-			cursor.execute("""INSERT INTO `export` VALUES (%s,%s,%s,%s,%s  )""", (entry.Customer_ID, int(entry.Sales_Agent_ID), entry.Receipt_ID, entry.Notes, entry.Date_Scheduled_Payment_2))   
+			cursor.execute("""INSERT INTO `test_database`.`export` (`Customer_ID`, `Sales_Agent_ID`, `Receipt_ID`, `Notes`, `Date_Scheduled_Payment_2`) VALUES (%s,%s,%s,%s,%s )""", \
+				(entry.Customer_ID, entry.Sales_Agent_ID, entry.Receipt_ID, entry.Notes, entry.Date_Scheduled_Payment_2))
 			db.commit()
 		except ValueError as e:
 			print "RecordID ", entry.RECORDID , "sql transaction not succesful ", e
@@ -88,6 +118,7 @@ def getFromSqldb():
 	# Prepare SQL query to INSERT a record into the database.
 	# sql = "SELECT * FROM `export` "
 	sql = "SELECT * FROM  `export` WHERE Customer_ID > 29000 "
+
 	try:
 		cursor.execute(sql)													# Execute the SQL command
 		results = cursor.fetchall() 										# Fetch all the rows in a list of lists.
@@ -139,6 +170,7 @@ def initSqldb():																# Recreate a new table for testing
 		db.rollback()
 	db.close()																	# Disconnect from server
 
+<<<<<<< HEAD
 def updateSqlRecord(newNotesField):															# update hardcoded record
 	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB)				# Open sql connection
 	cursor = db.cursor()
@@ -183,13 +215,23 @@ run()
 # 		print (record[item].split('='))
 # --
 # currentlist = getFromSqldb()
+=======
+
+# run 
+# checkDbserver()
+# initSqldb()
+# getFromFMdb()
+
+
 
 # some sql stuff
 # UPDATE `test_database`.`export` SET `Notes`='test 2.' WHERE  `Customer_ID`=29000 AND `Sales_Agent_ID`=85 AND `Receipt_ID`=29094 AND `Notes`='None'  LIMIT 1;
 # SELECT `Customer_ID`, `Sales_Agent_ID`, `Receipt_ID`, `Notes`, `Date_Scheduled_Payment_2` FROM `test_database`.`export` WHERE  `Customer_ID`=29000 AND `Sales_Agent_ID`=85 AND `Receipt_ID`=29094 AND `Notes`='This is an example note.' AND `Date_Scheduled_Payment_2`='0000-00-00' LIMIT 1;
 
 
+# ___
 
+# getFromFMdb()
 
 
 
