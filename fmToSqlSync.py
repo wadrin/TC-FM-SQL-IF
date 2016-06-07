@@ -2,7 +2,7 @@
 # coding: utf-8
 #
 # filename fmToSqlSync.py
-# version 0.31 - June 6, 2016 by <Jaap at kroesschell-ictconsulting.ch>
+# version 0.32 - June 6, 2016 by <Jaap at kroesschell-ictconsulting.ch>
 # Objective read payments , modify and update payment using PyFileMaker
 # 
 #
