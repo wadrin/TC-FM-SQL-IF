@@ -94,16 +94,15 @@ def getFromFmToSql():
 
 	count = 0
 	play = True
-	# firstRecord = 33624
+	firstRecord = 33574
 	steps = 50
-	firstRecord = 35200
 	lastRecord = firstRecord + steps
 
 	while play:
 		myList = list(range(firstRecord,lastRecord))
 		lastRecord = lastRecord + steps
 		firstRecord = firstRecord + steps
-		print "------  from ", firstRecord, " to ", lastRecord," ------"
+		# print "------  from ", firstRecord, " to ", lastRecord," ------"
 		# play = False
 
 
@@ -118,10 +117,10 @@ def getFromFmToSql():
 			play = False
 			print 
 
-		for entry in results: 
-			print '.',
+		for entry in results:
+			# print '.',
 			try:
-				cursor.execute("""INSERT INTO `test_database`.`customer` (`Customer_ID`, `name`, \
+				cursor.execute("""INSERT IGNORE INTO `test_database`.`customer` (`Customer_ID`, `name`, \
 					`province_id`,`province_la_en`, `district_id`, `district_la`, `village_id`, `village_la`, \
 					`sub_unit`,`latitude`, `longitude`, `phone_1`, `phone_2`, `notes`, `collector_id`, \
 					`sync_datetime`, `update_datetime`) VALUES (%s,%s,%s,%s,%s, %s,%s,%s,%s,%s, %s,%s,%s,%s,%s, %s,%s )""", 
@@ -147,7 +146,7 @@ def getFromFmToSql():
 				print "Customer_ID ", entry.Customer_ID , "sql transaction not succesful ", e
 				db.rollback()
 		else:
-			print  " next set"
+			print  "."
 	db.close()	# Disconnect from sql server
 	return
 
