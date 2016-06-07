@@ -2,7 +2,7 @@
 # coding: utf-8
 #
 # filename fmToSqlSync.py
-# version 0.32 - June 6, 2016 by <Jaap at kroesschell-ictconsulting.ch>
+# version 0.33 - June 6, 2016 by <Jaap at kroesschell-ictconsulting.ch>
 # Objective read costomer records from export set and save into sql db
 # 
 #
@@ -33,7 +33,7 @@ fm.setDb(FMDB)	# Declare fms db to be used
 def initSqldb():	# (re)create a new table for testing
 	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB) # Open sql connection
 	cursor = db.cursor()	# Prepare a cursor object using cursor() method									
-	try:
+	try: # setup customer table
 		cursor.execute("""DROP TABLE IF EXISTS `customer`""")
 		cursor.execute("""CREATE TABLE `customer` (\
 	`customer_id` INT(11) NOT NULL COMMENT '_Customer ID',
@@ -57,9 +57,24 @@ def initSqldb():	# (re)create a new table for testing
 	COLLATE='utf8_unicode_ci' """)
 		db.commit()
 	except IOError as e:
-		print e
+		print 'customer :', e
 		db.rollback()
+
+	try: # setup collector table
+		cursor.execute("""DROP TABLE IF EXISTS `collector`""")
+		cursor.execute("""CREATE TABLE `collector` ( \
+	`collector_id` INT(11) NOT NULL, \
+	`name` VARCHAR(25) NULL DEFAULT NULL COLLATE 'utf8_unicode_ci', \
+	`password` VARCHAR(100) NULL DEFAULT NULL COLLATE 'utf8_unicode_ci', \
+	PRIMARY KEY (`collector_id`)) \
+	COLLATE='utf8_unicode_ci' """)
+		db.commit()
+	except IOError as e:
+		print 'collector :', e
+		db.rollback()
+
 	db.close()	# Disconnect from server
+
 
 
 def getFromFmToSql():
@@ -72,39 +87,63 @@ def getFromFmToSql():
 	selector = 'export sync'	# Define layout from fms
 	fm.setLayout(selector)	# Use defined layout
 
-	myList = list(range(33625,33636))	# Look for the x records, range([start], stop[, step])
+	def hasValue(intFieldName):	#  Function: if the given field contains a string, it is converted to an int
+		print " var is ",intFieldName
+		if intFieldName:
+			output=int(intFieldName)
+		else:
+			output=None
+		return output
+
+	counter = 1
+	s = 29000
+	bulk = 29050	
+	myList = list(range(s,bulk))	# Look for the x records, range([start], stop[, step
 	results = fm.doFindQuery({'_Customer_ID': myList, }) 
 	print 'Number of results : ', len(results)	# Display the numeber of objects (records) found 
+
 	print 'looking for : '
 	for entry in results: 
 		# print dir(entry)
-		print '.',
+		print '.'
+
+		# Province_ID_var=int(entry.Customers_Village_Sale.Province_ID)
+		# District_ID_var=int(entry.Customers_Village_Sale.District_ID)
+		# Village_ID_var=int(entry.Customers_Village_Sale.Village_ID)
+		# if entry.Customers_Village_Sale.Province_ID:
+		# 	Province_ID_var=int(entry.Customers_Village_Sale.Province_ID)
+		# 	print "Province ID contains data"
+		# else:
+		# 	Province_ID_var=None
+		# 	print "Province ID is empty"
+
+
 		try:
 			cursor.execute("""INSERT INTO `test_database`.`customer` (`Customer_ID`, `name`, \
 				`province_id`,`province_la_en`, `district_id`, `district_la`, `village_id`, `village_la`, \
 				`sub_unit`,`latitude`, `longitude`, `phone_1`, `phone_2`, `notes`, `collector_id`, \
-				`sync_datetime`, `update_datetime`) VALUES (%s,%s,%s,%s,%s, %s,%s,%s,%s,%s, %s,%s,%s,%s,%s, %s,%s )""", \
-			 	(entry.Customer_ID, \
-			 		(entry.Customers_Village_Sale.Name_Full_Bilingual), \
-			 		int(entry.Customers_Village_Sale.Province_ID), \
-			 		(entry.Province_Reference_Village_Sales.Province_Name_Bilingual), \
-			 		int(entry.Customers_Village_Sale.District_ID),  \
-			 		(entry.District_Reference_Village_Sales.District_Name_Lao), \
-			 		int(entry.Customers_Village_Sale.Village_ID), \
-			 		(entry.Village_Reference_Village_Sales.Village_Name_Lao), \
-			 		None, \
-			 		None, \
-			 		None, \
-			 		entry.Customers_Village_Sale.Phone_1, \
-			 		None, \
-			 		entry.Customers_Village_Sale.Notes, \
-			 		None, \
-			 		None, \
-			 		None \
+				`sync_datetime`, `update_datetime`) VALUES (%s,%s,%s,%s,%s, %s,%s,%s,%s,%s, %s,%s,%s,%s,%s, %s,%s )""", 
+			 	(int(entry.Customer_ID), 
+			 		entry.Customers_Village_Sale.Name_Full_Bilingual, 
+			 		hasValue(entry.Customers_Village_Sale.Province_ID),
+			 		entry.Province_Reference_Village_Sales.Province_Name_Bilingual, 
+			 		hasValue(entry.Customers_Village_Sale.District_ID),
+			 		entry.District_Reference_Village_Sales.District_Name_Lao, 
+			 		hasValue(entry.Customers_Village_Sale.Village_ID),
+			 		entry.Village_Reference_Village_Sales.Village_Name_Lao, 
+			 		None, 
+			 		None, 
+			 		None, 
+			 		entry.Customers_Village_Sale.Phone_1, 
+			 		None, 
+			 		entry.Customers_Village_Sale.Notes, 
+			 		None, 
+			 		None, 
+			 		None 
 			 		))
 			db.commit()
-		except ValueError as e:
-			print "RecordID ", entry.RECORDID , "sql transaction not succesful ", e
+		except IOError as e:
+			print "Customer_ID ", entry.Customer_ID , "sql transaction not succesful ", e
 			db.rollback()
 	db.close()	# Disconnect from sql server
 	return
