@@ -3,7 +3,7 @@
 #
 # filename fmToSqlSync.py
 # version 0.32 - June 6, 2016 by <Jaap at kroesschell-ictconsulting.ch>
-# Objective read payments , modify and update payment using PyFileMaker
+# Objective read costomer records from export set and save into sql db
 # 
 #
 # python 2.7 
