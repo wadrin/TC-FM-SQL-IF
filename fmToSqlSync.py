@@ -26,7 +26,7 @@ SQLDBPASSWORD = os.environ.get('SQLDBPASSWORD')	# SQLDBPASSWORD = 'sql password'
 
 FMACCESS = FMDBUSER+':'+FMDBPASSWORD+'@'+FMDBHOST	# Facilitate fm db connection
 fm = FMServer('http://'+FMACCESS)	# Facilitate fm db connection
-fm._debug = True	# Enable fms debugging (exposes urls)
+# fm._debug = True	# Enable fms debugging (exposes urls)
 fm.setDb(FMDB)	# Declare fms db to be used
 
 
@@ -75,8 +75,6 @@ def initSqldb():	# (re)create a new table for testing
 
 	db.close()	# Disconnect from server
 
-
-
 def getFromFmToSql():
 	db = MySQLdb.connect(SQLDBHOST,SQLDBUSER,SQLDBPASSWORD,SQLDB) # Open sql connection
 	cursor = db.cursor()	# Prepare a cursor object using cursor() method		
@@ -88,63 +86,68 @@ def getFromFmToSql():
 	fm.setLayout(selector)	# Use defined layout
 
 	def hasValue(intFieldName):	#  Function: if the given field contains a string, it is converted to an int
-		print " var is ",intFieldName
 		if intFieldName:
 			output=int(intFieldName)
 		else:
 			output=None
 		return output
 
-	counter = 1
-	s = 29000
-	bulk = 29050	
-	myList = list(range(s,bulk))	# Look for the x records, range([start], stop[, step
-	results = fm.doFindQuery({'_Customer_ID': myList, }) 
-	print 'Number of results : ', len(results)	# Display the numeber of objects (records) found 
+	count = 0
+	play = True
+	# firstRecord = 33624
+	steps = 50
+	firstRecord = 35200
+	lastRecord = firstRecord + steps
 
-	print 'looking for : '
-	for entry in results: 
-		# print dir(entry)
-		print '.'
-
-		# Province_ID_var=int(entry.Customers_Village_Sale.Province_ID)
-		# District_ID_var=int(entry.Customers_Village_Sale.District_ID)
-		# Village_ID_var=int(entry.Customers_Village_Sale.Village_ID)
-		# if entry.Customers_Village_Sale.Province_ID:
-		# 	Province_ID_var=int(entry.Customers_Village_Sale.Province_ID)
-		# 	print "Province ID contains data"
-		# else:
-		# 	Province_ID_var=None
-		# 	print "Province ID is empty"
+	while play:
+		myList = list(range(firstRecord,lastRecord))
+		lastRecord = lastRecord + steps
+		firstRecord = firstRecord + steps
+		print "------  from ", firstRecord, " to ", lastRecord," ------"
+		# play = False
 
 
-		try:
-			cursor.execute("""INSERT INTO `test_database`.`customer` (`Customer_ID`, `name`, \
-				`province_id`,`province_la_en`, `district_id`, `district_la`, `village_id`, `village_la`, \
-				`sub_unit`,`latitude`, `longitude`, `phone_1`, `phone_2`, `notes`, `collector_id`, \
-				`sync_datetime`, `update_datetime`) VALUES (%s,%s,%s,%s,%s, %s,%s,%s,%s,%s, %s,%s,%s,%s,%s, %s,%s )""", 
-			 	(int(entry.Customer_ID), 
-			 		entry.Customers_Village_Sale.Name_Full_Bilingual, 
-			 		hasValue(entry.Customers_Village_Sale.Province_ID),
-			 		entry.Province_Reference_Village_Sales.Province_Name_Bilingual, 
-			 		hasValue(entry.Customers_Village_Sale.District_ID),
-			 		entry.District_Reference_Village_Sales.District_Name_Lao, 
-			 		hasValue(entry.Customers_Village_Sale.Village_ID),
-			 		entry.Village_Reference_Village_Sales.Village_Name_Lao, 
-			 		None, 
-			 		None, 
-			 		None, 
-			 		entry.Customers_Village_Sale.Phone_1, 
-			 		None, 
-			 		entry.Customers_Village_Sale.Notes, 
-			 		None, 
-			 		None, 
-			 		None 
-			 		))
-			db.commit()
-		except IOError as e:
-			print "Customer_ID ", entry.Customer_ID , "sql transaction not succesful ", e
-			db.rollback()
+
+		myList = list(range(firstRecord,lastRecord))	# Look for the x records, range([start], stop[, step
+		# print "list", myList
+		results = fm.doFindQuery({'_Customer_ID': myList, })
+		importedRecords = len(results)	
+		if importedRecords > 0:
+			play = True
+		else:
+			play = False
+			print 
+
+		for entry in results: 
+			print '.',
+			try:
+				cursor.execute("""INSERT INTO `test_database`.`customer` (`Customer_ID`, `name`, \
+					`province_id`,`province_la_en`, `district_id`, `district_la`, `village_id`, `village_la`, \
+					`sub_unit`,`latitude`, `longitude`, `phone_1`, `phone_2`, `notes`, `collector_id`, \
+					`sync_datetime`, `update_datetime`) VALUES (%s,%s,%s,%s,%s, %s,%s,%s,%s,%s, %s,%s,%s,%s,%s, %s,%s )""", 
+				 	(int(entry.Customer_ID), 
+				 		entry.Customers_Village_Sale.Name_Full_Bilingual, 
+				 		hasValue(entry.Customers_Village_Sale.Province_ID),
+				 		entry.Province_Reference_Village_Sales.Province_Name_Bilingual, 
+				 		hasValue(entry.Customers_Village_Sale.District_ID),
+				 		entry.District_Reference_Village_Sales.District_Name_Lao, 
+				 		hasValue(entry.Customers_Village_Sale.Village_ID),
+				 		entry.Village_Reference_Village_Sales.Village_Name_Lao, 
+				 		None, 
+				 		None, 
+				 		None, 
+				 		entry.Customers_Village_Sale.Phone_1, 
+				 		None, 
+				 		entry.Customers_Village_Sale.Notes, 
+				 		None, 
+				 		None, 
+				 		None ))
+				db.commit()
+			except IOError as e:
+				print "Customer_ID ", entry.Customer_ID , "sql transaction not succesful ", e
+				db.rollback()
+		else:
+			print  " next set"
 	db.close()	# Disconnect from sql server
 	return
 
