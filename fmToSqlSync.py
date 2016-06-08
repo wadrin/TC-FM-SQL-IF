@@ -2,8 +2,8 @@
 # coding: utf-8
 #
 # filename fmToSqlSync.py
-# version 0.35 - June 7, 2016 by <Jaap at kroesschell-ictconsulting.ch>
-# Objective read costomer records from export set and save into sql db
+# version 0.36 - June 8, 2016 by <Jaap at kroesschell-ictconsulting.ch>
+# Objective read costomer records from export set and populate sql db
 # 
 #
 # python 2.7 
@@ -11,23 +11,36 @@
 import unicodedata
 import os
 import MySQLdb
-import datetime
+from datetime import datetime
 from PyFileMaker import FMServer
+
 
 # Get access details from env / Or set locally (for debugging only) 
 FMDBHOST = os.environ.get('FMDBHOST')	# FMDBHOST = 'host name or ip address'
 FMDB 	= os.environ.get('FMDB')	# FMDB = 'fm database name'
 FMDBUSER = os.environ.get('FMDBUSER')	# FMDBUSER = 'fm user name'
 FMDBPASSWORD = os.environ.get('FMDBPASSWORD')	# FMDBPASSWORD = 'fm password'
-SQLDBHOST = os.environ.get('SQLDBHOST')	# SQLDBHOST = 'host name or ip address'
-SQLDB = os.environ.get('SQLDB')	# SQLDB = 'sql database name'
-SQLDBUSER = os.environ.get('SQLDBUSER')	# SQLDBUSER = 'sql user name'
-SQLDBPASSWORD = os.environ.get('SQLDBPASSWORD')	# SQLDBPASSWORD = 'sql password'
+
+# local dev db
+# SQLDBHOST = os.environ.get('SQLDBHOST')	# SQLDBHOST = 'host name or ip address'
+# SQLDB = os.environ.get('SQLDB')	# SQLDB = 'sql database name'
+# SQLDBUSER = os.environ.get('SQLDBUSER')	# SQLDBUSER = 'sql user name'
+# SQLDBPASSWORD = os.environ.get('SQLDBPASSWORD')	# SQLDBPASSWORD = 'sql password'
+
+# TC AWS db ( also change db name in sql code manually)
+SQLDBHOST = os.environ.get('TCAWS_SQLDBHOST')	# SQLDBHOST = 'host name or ip address'
+SQLDB = os.environ.get('TCAWS_SQLDB')	# SQLDB = 'sql database name'
+SQLDBUSER = os.environ.get('TCAWS_SQLDBUSER')	# SQLDBUSER = 'sql user name'
+SQLDBPASSWORD = os.environ.get('TCAWS_SQLDBPASSWORD')	# SQLDBPASSWORD = 'sql password'
 
 FMACCESS = FMDBUSER+':'+FMDBPASSWORD+'@'+FMDBHOST	# Facilitate fm db connection
 fm = FMServer('http://'+FMACCESS)	# Facilitate fm db connection
 # fm._debug = True	# Enable fms debugging (exposes urls)
 fm.setDb(FMDB)	# Declare fms db to be used
+
+
+def now():
+	return datetime.now()
 
 
 def initSqldb():	# (re)create a new table for testing
@@ -104,23 +117,24 @@ def getFromFmToSql():
 		firstRecord = firstRecord + steps
 		# print "------  from ", firstRecord, " to ", lastRecord," ------"
 		# play = False
-
-
-
 		myList = list(range(firstRecord,lastRecord))	# Look for the x records, range([start], stop[, step
 		# print "list", myList
 		results = fm.doFindQuery({'_Customer_ID': myList, })
 		importedRecords = len(results)	
-		if importedRecords > 0:
+		if importedRecords > 0 :
 			play = True
 		else:
 			play = False
-			print 
-
+			print "importedRecords = ", importedRecords
+		
+		stamp = datetime.now()
 		for entry in results:
 			# print '.',
+			# print datetime(now)
+			# print "entry.Customer_ID ", type(int(entry.Customer_ID)), entry.Customer_ID
+
 			try:
-				cursor.execute("""INSERT IGNORE INTO `test_database`.`customer` (`Customer_ID`, `name`, \
+				cursor.execute("""INSERT IGNORE INTO `WADRIN_dev`.`customer` (`Customer_ID`, `name`, \
 					`province_id`,`province_la_en`, `district_id`, `district_la`, `village_id`, `village_la`, \
 					`sub_unit`,`latitude`, `longitude`, `phone_1`, `phone_2`, `notes`, `collector_id`, \
 					`sync_datetime`, `update_datetime`) VALUES (%s,%s,%s,%s,%s, %s,%s,%s,%s,%s, %s,%s,%s,%s,%s, %s,%s )""", 
@@ -140,21 +154,25 @@ def getFromFmToSql():
 				 		entry.Customers_Village_Sale.Notes, 
 				 		None, 
 				 		None, 
-				 		None ))
+				 		stamp ))
 				db.commit()
+				if int(entry.Customer_ID) > 35654: play = False
 			except IOError as e:
 				print "Customer_ID ", entry.Customer_ID , "sql transaction not succesful ", e
 				db.rollback()
 		else:
-			print  "."
+			print  "last record imported.",
 	db.close()	# Disconnect from sql server
 	return
 
 
 def run():
-	initSqldb()
-	getFromFmToSql()
+	# initSqldb()
+	# getFromFmToSql()
 	return
 
 
 run()
+
+# local db transfer time real	2m22.803s 
+# aws db transfer time real	6m21.603s
