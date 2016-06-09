@@ -1,0 +1,36 @@
+windows install notes TC fm machine (Thakhek)
+by <Jaap at kroesschell-ictconsulting.ch> on 08.06.2016
+updated 09.06 by Wadrin
+
+install source in C:\Users\SalesDatabase\Downloads
+
+install :
+1) python 2.7 from https://www.python.org/ftp/python/2.7.11/python-2.7.11.msi (in c:\opt\Python27) failed (admin access needed)
+2) github from https://github.com/git-for-windows/git/releases/latest	(in c:\opt\Git) OK
+
+cd c:\opt\workspace
+3) git clone https://github.com/wadrin/TC-FM-SQL-IF.git OK
+
+4) wget commandline download from https://eternallybored.org/misc/wget/releases/wget-1.17.1-win64.zip
+5) ez_setup (for pip) download from http://peak.telecommunity.com/dist/ez_setup.py
+	C:\opt\workspace\TC-FM-SQL-IF>\opt\Python27\python.exe ez_setup.py
+	Setuptools version 0.6c11 or greater has been installed.
+	(Run "ez_setup.py -U setuptools" to reinstall or upgrade.)
+6) run ez_setup.py -U setuptools (to install python 2.7 setuptools)
+
+pending steps:
+
+get https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+run get-pip.py
+
+run pip.exe install virtualenv
+
+(in \opt\workspace\TC-FM-SQL-IF\):
+	create venv: virtualenv.exe venv
+	start venv:	venvname\Scripts\activate
+	install modules in venv: pip.exe install -r requirements.txt 
+
+
+
+ref:
+https://zignar.net/2012/06/17/install-python-on-windows/
