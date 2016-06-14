@@ -11,25 +11,68 @@ install :
 cd c:\opt\workspace
 3) git clone https://github.com/wadrin/TC-FM-SQL-IF.git OK
 
-4) wget commandline download from https://eternallybored.org/misc/wget/releases/wget-1.17.1-win64.zip
-5) ez_setup (for pip) download from http://peak.telecommunity.com/dist/ez_setup.py
+4) wget commandline download from https://eternallybored.org/misc/wget/releases/wget-1.17.1-win64.zip OK
+5) ez_setup (for pip) download from http://peak.telecommunity.com/dist/ez_setup.py OK
 	C:\opt\workspace\TC-FM-SQL-IF>\opt\Python27\python.exe ez_setup.py
 	Setuptools version 0.6c11 or greater has been installed.
 	(Run "ez_setup.py -U setuptools" to reinstall or upgrade.)
-6) run ez_setup.py -U setuptools (to install python 2.7 setuptools)
-
-pending steps:
-
-get https://raw.github.com/pypa/pip/master/contrib/get-pip.py
-run get-pip.py
-
-run pip.exe install virtualenv
+6) run ez_setup.py -U setuptools (to install python 2.7 setuptools) OK
+7) get https://bootstrap.pypa.io/get-pip.py OK
+8) run : C:\opt\Python27\Python27.exe get-pip.py OK
+9) run C:\opt\Python27\Scripts\pip.exe install virtualenv OK
 
 (in \opt\workspace\TC-FM-SQL-IF\):
-	create venv: virtualenv.exe venv
-	start venv:	venvname\Scripts\activate
-	install modules in venv: pip.exe install -r requirements.txt 
+	create venv: C:\opt\Python27\Scripts\virtualenv.exe venv OK
+	start venv:	venvname\Scripts\activate Ok
+	install modules in venv: C:\opt\Python27\Scripts\pip.exe install -r requirements.txt Errors
 
+in windows : set PYTHONPATH=%PYTHONPATH%;C:\opt\Python27\lib
+
+errors: 
+
+  Running setup.py (path:c:\users\salesd~1\appdata\local\temp\pip-build-hlzkbr\P
+yFileMaker\setup.py) egg_info for package PyFileMaker
+    Running command python setup.py egg_info
+    Traceback (most recent call last):
+      File "<string>", line 1, in <module>
+      File "c:\users\salesd~1\appdata\local\temp\pip-build-hlzkbr\PyFileMaker\se
+tup.py", line 4, in <module>
+        from PyFileMaker import __version__
+      File "PyFileMaker\__init__.py", line 23, in <module>
+        from FMServer import *
+      File "PyFileMaker\FMServer.py", line 15, in <module>
+        import requests
+    ImportError: No module named requests
+Cleaning up...
+Command "python setup.py egg_info" failed with error code 1 in c:\users\salesd~1
+\appdata\local\temp\pip-build-hlzkbr\PyFileMaker\
+Exception information:
+Traceback (most recent call last):
+  File "c:\opt\python27\lib\site-packages\pip\basecommand.py", line 215, in main
+
+    status = self.run(options, args)
+  File "c:\opt\python27\lib\site-packages\pip\commands\install.py", line 310, in
+ run
+    wb.build(autobuilding=True)
+  File "c:\opt\python27\lib\site-packages\pip\wheel.py", line 750, in build
+    self.requirement_set.prepare_files(self.finder)
+  File "c:\opt\python27\lib\site-packages\pip\req\req_set.py", line 370, in prep
+are_files
+    ignore_dependencies=self.ignore_dependencies))
+  File "c:\opt\python27\lib\site-packages\pip\req\req_set.py", line 601, in _pre
+pare_file
+    abstract_dist.prep_for_dist()
+  File "c:\opt\python27\lib\site-packages\pip\req\req_set.py", line 127, in prep
+_for_dist
+    self.req_to_install.run_egg_info()
+  File "c:\opt\python27\lib\site-packages\pip\req\req_install.py", line 425, in
+run_egg_info
+    command_desc='python setup.py egg_info')
+  File "c:\opt\python27\lib\site-packages\pip\utils\__init__.py", line 718, in c
+all_subprocess
+    % (command_desc, proc.returncode, cwd))
+InstallationError: Command "python setup.py egg_info" failed with error code 1 i
+n c:\users\salesd~1\appdata\local\temp\pip-build-hlzkbr\PyFileMaker\
 
 
 ref:
